@@ -25,6 +25,5 @@ interface DomainModule {
 
     @Binds
     fun providePostRepository(postRepositoryImpl: PostRepositoryImpl): PostRepository
-    
 
 }

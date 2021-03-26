@@ -10,7 +10,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.Subject
 
 @CheckResult
-inline fun <T : Any, R : Any> Observable<T>.exhaustive(crossinline transform: (T) -> Observable<out R>): Observable<R> {
+inline fun <T : Any, R : Any> Observable<T>.exhaustMap(crossinline transform: (T) -> Observable<out R>): Observable<R> {
     return this
         .toFlowable(BackpressureStrategy.DROP)
         .flatMap({transform(it).toFlowable(BackpressureStrategy.MISSING)}, 1)

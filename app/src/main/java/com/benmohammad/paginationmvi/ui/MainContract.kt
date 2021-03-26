@@ -2,6 +2,8 @@ package com.benmohammad.paginationmvi.ui
 
 import androidx.annotation.LayoutRes
 import com.benmohammad.paginationmvi.R
+import com.benmohammad.paginationmvi.domain.entity.Photo
+import com.benmohammad.paginationmvi.domain.entity.Post
 import com.benmohammad.paginationmvi.ui.MainContract.Item.HorizontalList.HorizontalItem
 import io.reactivex.Observable
 
@@ -38,12 +40,40 @@ interface MainContract {
                     (horizontalList.items.singleOrNull { it is HorizontalItem.PlaceHolder } as? HorizontalItem.PlaceHolder)?.state == PlaceHolderState.Idle
         }
 
+        fun getHorizontalListCount(): Int {
+            val horizontalList =
+                items.singleOrNull { it is Item.HorizontalList } as? Item.HorizontalList ?: return 0
+            return horizontalList.postItems.size
+        }
 
+        fun shouldRetryNextPageHorizontal(): Boolean {
+            val horizontalList =
+                items.singleOrNull { it is Item.HorizontalList } as? Item.HorizontalList ?: return false
+            return horizontalList.shouldRetry()
+        }
 
+        fun shouldRetryHorizontal(): Boolean {
+            val horizontalList =
+                items.singleOrNull { it is Item.HorizontalList } as? Item.HorizontalList  ?: return false
+            return horizontalList.shouldRetry()
+        }
+
+        companion object Factory {
+            @JvmStatic
+            fun initial() = ViewState(
+                items = listOf(
+                    Item.HorizontalList(
+                        items = emptyList(),
+                        isLoading = true,
+                        error = null,
+                        postItems = emptyList()
+                    )
+                ),
+                photoItems = emptyList(),
+                isRefreshing = false
+            )
+        }
     }
-
-
-
 
     sealed class Item(@LayoutRes val viewType: Int) {
         data class HorizontalList(
@@ -54,7 +84,7 @@ interface MainContract {
         ): Item(R.layout.recycler_item_horizontal_list) {
 
             fun shouldRetry(): Boolean {
-                return !isLoading && error != null && items.isEmpty()
+                return !isLoading && error !== null && items.isEmpty()
             }
 
             sealed class HorizontalItem(@LayoutRes val viewType: Int) {
@@ -76,13 +106,13 @@ interface MainContract {
             val title: String,
             val url: String
     ) {
-//        constructor(domain: PhotoDomain): this(
-//                id = domain.id,
-//                albumId = domain.albumId,
-//                thumbnailUrl = domain.thumbnailUrl,
-//                title = domain.title,
-//                url = domain.url
-//        )
+        constructor(domain: Photo): this(
+                id = domain.id,
+                albumId = domain.albumId,
+                thumbnailUrl = domain.thumbnailUrl,
+                title = domain.title,
+                url = domain.url
+        )
     }
 
     data class PostVS(
@@ -91,12 +121,12 @@ interface MainContract {
             val title: String,
             val userId: Int
     ) {
-//        constructor(domain: PostDomain): this(
-//                body = domain.body,
-//                userId = domain.userId,
-//                id = domain.id,
-//                title = domain.title
-//        )
+        constructor(domain: Post): this(
+                body = domain.body,
+                userId = domain.userId,
+                id = domain.id,
+                title = domain.title
+        )
     }
 
     sealed class PlaceHolderState {
@@ -336,9 +366,20 @@ interface MainContract {
         }
     }
 
+    sealed class SingleEvent {
+        object RefreshSuccess : SingleEvent()
+        data class RefreshFailure(val error: Throwable): SingleEvent()
+        data class GetPostsFailure(val error: Throwable): SingleEvent()
+        object HasReachedMaxHorizontal: SingleEvent()
+
+        data class GetPhotosFailure(val error: Throwable): SingleEvent()
+        object HasReachedMax : SingleEvent()
+    }
+
+
     interface Interactor {
         fun photoNextPageChange(start: Int, limit: Int):Observable<PartialStateChange.PhotoNextPage>
-        fun photoFirstPageChange(limit: Int): Observable<PartialStateChange.PostFirstPage>
+        fun photoFirstPageChange(limit: Int): Observable<PartialStateChange.PhotoFirstPage>
         fun postFirstPageChanges(limit: Int): Observable<PartialStateChange.PostFirstPage>
         fun postNextPageChanges(start: Int, limit: Int): Observable<PartialStateChange.PostNextPage>
         fun refreshAll(limitPost: Int, limitPhoto: Int): Observable<PartialStateChange.Refresh>
