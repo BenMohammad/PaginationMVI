@@ -21,7 +21,7 @@ import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
-        private val interactor: MainContract.Interactor,
+        private val interactor: Interactor,
         private val rxSchedulerProvider: RxSchedulerProvider
 ): ViewModel() {
         private val initial = initial()
@@ -39,7 +39,7 @@ class MainViewModel @Inject constructor(
         fun processIntents(intents: Observable<ViewIntent>) = intents.subscribe(intentS::onNext)
 
         private val initialProcessor =
-                ObservableTransformer<ViewIntent.Initial, MainContract.PartialStateChange> {
+                ObservableTransformer<ViewIntent.Initial, PartialStateChange> {
                         intents ->
                         intents.withLatestFrom(stateObservable)
                                 .filter{(_, vs) -> vs.photoItems.isEmpty()}
