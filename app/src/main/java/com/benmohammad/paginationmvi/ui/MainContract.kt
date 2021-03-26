@@ -13,7 +13,7 @@ interface MainContract {
             val photoItems: List<Item.Photo>,
             val isRefreshing: Boolean
     ) {
-        val enable: Boolean
+        val enableRefresh: Boolean
         get() {
             val horizontalList =
                     items.singleOrNull {it is Item.HorizontalList} as? Item.HorizontalList ?: return false
