@@ -1,12 +1,14 @@
 package com.benmohammad.paginationmvi.data
 
 import com.benmohammad.paginationmvi.data.remote.ApiService
+import com.benmohammad.paginationmvi.di.ApplicationScope
 import com.benmohammad.paginationmvi.domain.dispatchers.CoroutinesDispatcherProvider
 import com.benmohammad.paginationmvi.domain.entity.Photo
 import com.benmohammad.paginationmvi.domain.repo.PhotoRepository
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@ApplicationScope
 class PhotoRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
     private val dispatcherProvider: CoroutinesDispatcherProvider

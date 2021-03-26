@@ -1,9 +1,11 @@
 package com.benmohammad.paginationmvi.domain.usecase
 
+import com.benmohammad.paginationmvi.di.ApplicationScope
 import com.benmohammad.paginationmvi.domain.entity.Photo
 import com.benmohammad.paginationmvi.domain.repo.PhotoRepository
 import javax.inject.Inject
 
+@ApplicationScope
 class GetPhotosUseCase @Inject constructor(
     private val photoRepository: PhotoRepository
 ) {
