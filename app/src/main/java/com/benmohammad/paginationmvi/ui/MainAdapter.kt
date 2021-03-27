@@ -2,8 +2,10 @@ package com.benmohammad.paginationmvi.ui
 
 import android.graphics.Rect
 import android.os.Parcelable
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.DiffUtil
@@ -65,12 +67,31 @@ class MainAdapter(
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        TODO("Not yet implemented")
+        val itemView = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
+        return when (viewType) {
+            R.layout.recycler_item_photo -> PhotoVH(itemView)
+            R.layout.recycler_item_placeholder -> PlaceHolderVH(itemView, parent)
+            R.layout.recycler_item_horizontal_list  -> HorizontalListVH(itemView, parent)
+            else -> error("Unknown viewType: $viewType")
+        }
     }
 
-    override fun onBindViewHolder(holder: VH, position: Int) {
-        TODO("Not yet implemented")
+    override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
+
+    override fun onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>) {
+        if(payloads.isEmpty()) return holder.bind(getItem(position))
+        payloads.forEach { payload ->
+            when  {
+                payload is MainContract.PlaceHolderState && holder is PlaceHolderVH -> holder.update(payload)
+                payload is Item.HorizontalList && holder is HorizontalListVH -> holder.update(payload)
+                payload is Item.Photo && holder is PhotoVH -> holder.update(payload)
+            }
+        }
     }
+
+    @LayoutRes
+    override fun getItemViewType(position: Int) = getItem(position).viewType
+
 
     abstract class VH(itemView: View): RecyclerView.ViewHolder(itemView) {
         abstract fun bind(item: Item)
